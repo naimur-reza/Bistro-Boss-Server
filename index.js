@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://Bistro-Boss:ccicrWaxVWb3uIi7@cluster0.2cofc5d.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -24,6 +24,7 @@ const client = new MongoClient(uri, {
 
 const bistroDb = client.db("bistroDb").collection("menu");
 const cartDb = client.db("bistroDb").collection("cart");
+const usersDb = client.db("bistroDb").collection("users");
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
@@ -52,11 +53,17 @@ async function run() {
 
     app.delete("/cart/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: id };
+      const query = { _id: new ObjectId(id) };
       const result = await cartDb.deleteOne(query);
       res.send(result);
     });
 
+    // user data base
+    app.post("/users", async (req, res) => {
+      const userData = req.body;
+      const result = await usersDb.insertOne(userData);
+      res.send(result);
+    });
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
